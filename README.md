@@ -21,6 +21,8 @@ writes the information to the text file. This is repeated until the last review 
 is sent using that URL. The parsing method is then called recursively, passing in the HTML content of the next page. Once the last page is accessed and parsed, the crawler stops. 
 Errors in getting the HTTP responses are handled, as well as with the file writing.
 
+I designed the program to be easily expanded to account for further parsing. The parsing logic for each page is written in its own method, and can each be adjusted to get more information if necessary. If other pages are to be parsed, a new method following a similar logic could be created and added to the main loop. The parsing logic of each method is designed specifically to the structure of the pages, and accounts for any number of reviews to be parsed.
+
 ### Suggestions
 
 This application could be expanded to retrieve more information from the Cochrane Library site. For example, each review's URL could be accessed, and information from the abstract
