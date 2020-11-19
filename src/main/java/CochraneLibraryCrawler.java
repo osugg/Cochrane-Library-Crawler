@@ -26,16 +26,16 @@ public class CochraneLibraryCrawler {
                 ", or enter 'exit' to stop the program.");
         String topic = sc.nextLine();
 
-        while(!topic.equals("exit")){
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        CloseableHttpClient client = HttpClients.custom()
+                .setConnectionManager(connectionManager)
+                .setRedirectStrategy(new LaxRedirectStrategy())
+                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
+                        "(KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36")
+                .build();
+        ResponseHandler<String> responseHandler = new MyResponseHandler();
 
-            PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-            CloseableHttpClient client = HttpClients.custom()
-                    .setConnectionManager(connectionManager)
-                    .setRedirectStrategy(new LaxRedirectStrategy())
-                    .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-                            "(KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36")
-                    .build();
-            ResponseHandler<String> responseHandler = new MyResponseHandler();
+        while(!topic.equals("exit")){
 
             //make GET request to topics page
             HttpGet topicsGet = new HttpGet(baseUrl);
@@ -76,6 +76,11 @@ public class CochraneLibraryCrawler {
                     "or enter 'exit' to stop the program.");
             topic = sc.nextLine();
         }
+        try{
+            client.close();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -91,7 +96,7 @@ public class CochraneLibraryCrawler {
         Elements links = content.getElementsByTag("a");
         for(Element link : links) {
             Elements buttons = link.getElementsByTag("button");
-            String topicName = "";
+            String topicName;
             for(Element button : buttons){
                 topicName = button.text();
                 if(topicName.equals(topic)){
@@ -160,8 +165,7 @@ public class CochraneLibraryCrawler {
     private static String getNextPage(Element content){
         Element nextButton = content.getElementsByClass("pagination-next-link").get(0);
         if(nextButton.childrenSize() > 0){
-            String nextPageUrl = nextButton.child(0).attr("href");
-            return nextPageUrl;
+            return nextButton.child(0).attr("href");
         }
         return null;
     }
